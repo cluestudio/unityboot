@@ -1,11 +1,9 @@
 using UnityEngine;
 using System.Collections;
 
-
-public interface StringBundleService {
+public interface StringBundleService : IService {
     string language { get; }
 
-    IEnumerator Initialize(params string[] langs);
     string Get(string key);
     string GetWithEeGa(string key);
     string GetWithEulReul(string key);

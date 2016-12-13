@@ -15,6 +15,8 @@ public class StringBundleServiceImpl : Singleton<StringBundleServiceImpl>, Strin
     
     // properties
     //-------------------------------------------------------------------------
+    public ServiceType type { get { return ServiceType.StringBundle; } }
+
     public string language { 
         get { 
             string lang = GetSystemLanguage(Application.systemLanguage); 
@@ -28,21 +30,25 @@ public class StringBundleServiceImpl : Singleton<StringBundleServiceImpl>, Strin
 
     // apis
     //-------------------------------------------------------------------------
-    public IEnumerator Initialize(params string[] langs) {
+    public IEnumerator Initialize(BoolResult result) {
+        string [] langs = {"en", "ko", "ja"};
+
         this.defaultLang = langs[0];
         foreach (string lang in langs) {
             this.supportLangs.Add(lang);
         }
 
         LoadFromFile();
+        result.SetSuccess(true);
 #if UNITY_EDITOR        
-        ReportUntranslated();
-        ReportQuestions();
+//        ReportUntranslated();
+//        ReportQuestions();
 #endif
         yield break;
     }
 
     public string Get(string key) {
+        key = key.ToLower();
         if (bundles.ContainsKey(key) == false ){
             return key;
         }
@@ -137,6 +143,7 @@ public class StringBundleServiceImpl : Singleton<StringBundleServiceImpl>, Strin
     // private methods
     //-------------------------------------------------------------------------
     private void AddString(string key, string lang, string value) {
+        key = key.ToLower();
         if (bundles.ContainsKey(key) == false) {
             bundles.Add(key, new Dictionary<string, string>());
         }
@@ -152,6 +159,8 @@ public class StringBundleServiceImpl : Singleton<StringBundleServiceImpl>, Strin
     }
 
     private void AddQuestion(string key, string lang) {
+        key = key.ToLower();
+
         if (questions.ContainsKey(key) == false) {
             questions.Add(key, new HashSet<string>());
         }
@@ -207,7 +216,7 @@ public class StringBundleServiceImpl : Singleton<StringBundleServiceImpl>, Strin
                 }
             }
             else {
-                key = trimedLine;
+                key = trimedLine.ToLower();
             }
         }
     }
