@@ -33,18 +33,23 @@ public class GoPoolerImpl : SingletonGameObject<GoPoolerImpl>, GoPooler {
     }
 
     public void Return(GoItem item) {
+        if (item == null) {
+            return;
+        }
+
         string path = item.resourcePath;
         if (path == null || path.Length == 0) {
             Destroy(item.gameObject);
             return;
         }
 
-        if (item.gameObject.activeSelf == false) {
+        if (item.isInPool == true) {
             return;
         }
 
         Stack stack = GetStack(path);
         stack.Push(new WeakReference(item.gameObject));
+        item.isInPool = true;
         item.OnGoingIntoPool();
         MatchParent(item);
         item.transform.localPosition = Vector3.up * 9999;
@@ -80,11 +85,6 @@ public class GoPoolerImpl : SingletonGameObject<GoPoolerImpl>, GoPooler {
         GameObject prefab;
         if (!storedPrefabs.TryGetValue(path, out prefab) || prefab == null) {
             prefab = Resources.Load<GameObject>(path);
-            if (prefab == null) {
-                Logger.LogError("Can not load GameObject:" + path);
-                return null;
-            }
-
             storedPrefabs[path] = prefab;
         }
 
@@ -129,6 +129,7 @@ public class GoPoolerImpl : SingletonGameObject<GoPoolerImpl>, GoPooler {
         GoItem item = itemObj.GetComponent<GoItem>();
         if (item != null) {
             item.useCount++;
+            item.isInPool = false;
             item.OnGettingOutPool();
         }
     }
